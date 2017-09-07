@@ -10,13 +10,11 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    private var label = UILabel(frame: CGRect(x: 100, y: 100, width: 200, height: 50))
-    private var sockmgr: SocketManager? = nil
+    fileprivate var label = UILabel(frame: CGRect(x: 100, y: 100, width: 200, height: 50))
+    private var sockmgr: SocketManager = SocketManager.sharedInstance
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        sockmgr = SocketManager(withViewController: self)
-        sockmgr?.startServer()
+        sockmgr.delegate = self
         label.text = "dx = 0, dy = 0"
         self.view.addSubview(label)
     }
@@ -26,8 +24,11 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func scrollBy(dx: Int, dy: Int) {
-        label.text = "dx = \(dx), dy = \(dy)"
-    }
 }
 
+extension ViewController: SocketManagerDelegate {
+    func manager(manager: SocketManager, scrollBy move: (Int, Int)) {
+        label.text = "dx = \(move.0), dy = \(move.1)"
+    }
+
+}

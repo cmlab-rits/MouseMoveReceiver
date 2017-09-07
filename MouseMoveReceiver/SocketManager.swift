@@ -9,13 +9,20 @@
 import Foundation
 import CocoaAsyncSocket
 
+protocol SocketManagerDelegate {
+    func manager(manager: SocketManager, scrollBy move: (Int, Int))
+}
+
 class SocketManager: NSObject, GCDAsyncUdpSocketDelegate {
-    var vc: ViewController
+    static let sharedInstance = SocketManager()
+
+    var delegate: SocketManagerDelegate?
     let PORT = 9900 // port number for the socket
     fileprivate var _socket: GCDAsyncUdpSocket?
-    
-    init(withViewController vc: ViewController) {
-        self.vc = vc
+
+    override init() {
+        super.init()
+        startServer()
     }
 
     fileprivate var socket: GCDAsyncUdpSocket? {
@@ -61,8 +68,14 @@ class SocketManager: NSObject, GCDAsyncUdpSocketDelegate {
             NSLog("Received: \(str)")
             let split1 = str.components(separatedBy: "[/p]")
             let split2 = split1[0].components(separatedBy: "|")
-            vc.scrollBy(dx: Int(split2[0])!, dy: Int(split2[1])!)
+
+            guard let dx = Int(split2[0]), let dy = Int(split2[1]) else { return }
+
+            delegate?.manager(manager: self, scrollBy: (dx, dy))
+
         }
     }
 
 }
+
+
